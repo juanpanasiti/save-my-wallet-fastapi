@@ -2,15 +2,15 @@ from passlib.context import CryptContext
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
 from datetime import datetime, timedelta
-from jose import JWTError, jwt
 
 from api.exceptions.db_exceptions import DuplicateDataError
 from api.schemas.login_user_schema import LoginUser
 from api.schemas.register_user_schema import RegisterUser
 from api.config.settings import settings
 from api.database.smw_db import smw_db
-from api.database.models import user_model
+from api.database.models import user_model, user_profile_model
 from api.helpers.auth_helpers import create_jwt
+from api.exceptions.auth_exceptions import LoginCredentialsError
 
 
 class AuthService:
@@ -44,8 +44,12 @@ class AuthService:
 
         try:
             smw_db.session.add(new_user)
+            smw_db.session.flush()
+            new_user_profile = user_profile_model.UserProfileModel(**{'user_id': new_user.id})
+            smw_db.session.add(new_user_profile)
             smw_db.session.commit()
-            return True
+            access_token = create_jwt(data={'sub': new_user.username})
+            return new_user, access_token
         except IntegrityError as ie:
             smw_db.session.rollback()
             raise DuplicateDataError(ie.orig.args[1])
@@ -56,25 +60,10 @@ class AuthService:
             user_model.UserModel.username == form.username
         ).first()
 
-        if not user_db:
-            # TODO: replace HTTPException here
-            raise HTTPException(
-                status_code=400,
-                detail='Incorrect username/password'
-            )
+        if not user_db or not self.pwd_context.verify(form.password, user_db.password):
+            raise LoginCredentialsError()
 
-        if not self.pwd_context.verify(form.password, user_db.password):
-            # TODO: replace HTTPException here
-            raise HTTPException(
-                status_code=400,
-                detail='Incorrect username/password'
-            )
-
-        access_token_expires = timedelta(hours=settings.ACCESS_TOKEN_EXPIRE_HOURS)
-        access_token = create_jwt(
-            data={'sub': user_db.username},
-            expires_delta=access_token_expires
-        )
+        access_token = create_jwt(data={'sub': user_db.username})
         return {
             'token': access_token
         }

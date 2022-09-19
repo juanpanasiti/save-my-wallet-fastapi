@@ -4,9 +4,9 @@ from jose import jwt
 from api.config.settings import settings
 
 
-def create_jwt(data: dict, expires_delta: timedelta):
+def create_jwt(data: dict):
     to_encode = data.copy()
-    expire = datetime.now() + expires_delta
+    expire = datetime.now() + timedelta(hours=settings.ACCESS_TOKEN_EXPIRE_HOURS)
 
     to_encode.update({
         'exp': expire,

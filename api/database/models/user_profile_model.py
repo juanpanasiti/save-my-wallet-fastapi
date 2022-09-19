@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relationship, backref
-from sqlalchemy.sql.sqltypes import Integer, String, Date, Boolean
+from sqlalchemy.sql.sqltypes import Integer, String, DateTime, Boolean
 
 from api.config.db_config import Base
 
@@ -21,16 +21,25 @@ class UserProfileModel(Base):
         default=''
     )
     next_payment_date = Column(
-        Date,
+        DateTime,
         nullable=False,
-        default=datetime.timestamp
+        default=datetime.now()
     )
     last_update = Column(
-        Date,
+        DateTime,
         nullable=False,
-        default=datetime.timestamp
+        default=datetime.now()
     )
 
     # Relation
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship('UserModel', backref=backref('user_profile', uselist=False))
+
+    def to_json(self):
+        return {
+            'id': self.id,
+            'is_deleted': self.is_deleted,
+            'img_url': self.img_url,
+            'next_payment_date': self.next_payment_date,
+            'last_update': self.last_update,
+        }

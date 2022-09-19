@@ -35,3 +35,16 @@ class UserModel(Base):
         nullable=False,
         default=datetime.now()
     )
+
+    def to_json(self):
+        return {
+            'id': self.id,
+            'username': self.username,
+            'email': self.email,
+            'password': self.password,
+            'role': self.role,
+            'status': self.status,
+            'google': self.google,
+            'register_date': self.register_date,
+            'user_profile': self.user_profile.to_json()
+        }
