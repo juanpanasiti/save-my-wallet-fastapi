@@ -1,0 +1,14 @@
+# Pyenv
+.python-version
+
+# Python files
+**/__pycache__
+
+# Logs
+**/*.log
+
+# secrets
+.env
+
+# Others
+db/*

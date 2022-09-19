@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  smw-db:
+    container_name: smw-db
+    image: mysql:8.0
+    environment:
+      - MYSQL_DATABASE=savemywallet
+      - MYSQL_ROOT_PASSWORD=root
+    ports:
+      - "3316:3306"
+    networks:
+      - savemywallet_net
+    volumes:
+      - "./db/:/var/lib/mysql"
+
+networks:
+  savemywallet_net:
+    driver: bridge

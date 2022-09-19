@@ -1,0 +1,8 @@
+from enum import Enum
+
+
+class StatusEnum(str, Enum):
+    PENDING_STATUS = 'PENDING_STATUS'
+    ACTIVE_STATUS = 'ACTIVE_STATUS'
+    BANNED_STATUS = 'BANNED_STATUS'
+    DELETED_STATUS = 'DELETED_STATUS'
